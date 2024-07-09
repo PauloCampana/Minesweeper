@@ -1,11 +1,11 @@
 const std = @import("std");
-const rl = @import("raylib");
+const rl = @cImport(@cInclude("raylib.h"));
 const ms = @import("main.zig");
 
 pub fn ui() void {
     var buf: [64]u8 = undefined;
-    rl.clearBackground(ms.color_background);
-    rl.drawFPS(
+    rl.ClearBackground(ms.color_background);
+    rl.DrawFPS(
         ms.screen_width - ms.margin_width - 78,
         ms.margin_height,
     );
@@ -13,22 +13,22 @@ pub fn ui() void {
     const board = std.fmt.bufPrintZ(
         &buf,
         "{}x{} board, {}/{} mines",
-        .{ms.rows, ms.columns, ms.mines_marked, ms.mines_total}
+        .{ ms.rows, ms.columns, ms.mines_marked, ms.mines_total },
     ) catch unreachable;
-    rl.drawText(
+    rl.DrawText(
         board,
         ms.screen_width / 2 - 125,
         ms.margin_height,
         20,
-        ms.color_text
+        ms.color_text,
     );
 
     const time = std.fmt.bufPrintZ(
         &buf,
         "{d:.0}s",
-        .{rl.getTime()}
+        .{rl.GetTime()},
     ) catch unreachable;
-    rl.drawText(
+    rl.DrawText(
         time,
         ms.margin_width,
         ms.margin_height,
@@ -36,14 +36,14 @@ pub fn ui() void {
         ms.color_text,
     );
 
-    rl.drawText(
+    rl.DrawText(
         "Left click to clear cell",
         ms.margin_width,
         ms.margin_height + 40,
         20,
         ms.color_text,
     );
-    rl.drawText(
+    rl.DrawText(
         "Right click to mark mine",
         ms.margin_width,
         ms.margin_height + 60,
@@ -51,7 +51,7 @@ pub fn ui() void {
         ms.color_text,
     );
 
-    rl.drawLine(
+    rl.DrawLine(
         0,
         ms.header_height,
         ms.screen_width,
@@ -68,11 +68,11 @@ pub fn cells(board: [][]ms.Cell) void {
             const color = switch (cell.status) {
                 .unknown => ms.color_unknown,
                 .discovered => ms.color_discovered,
-                .marked => ms.color_marked
+                .marked => ms.color_marked,
             };
-            const xpos_casted = @as(i32, @intCast(xpos));
-            const ypos_casted = @as(i32, @intCast(ypos));
-            rl.drawRectangle(
+            const xpos_casted: i32 = @intCast(xpos);
+            const ypos_casted: i32 = @intCast(ypos);
+            rl.DrawRectangle(
                 xpos_casted,
                 ypos_casted,
                 ms.spacing,
@@ -83,22 +83,22 @@ pub fn cells(board: [][]ms.Cell) void {
             //     rl.drawText("kek", xpos_casted, ypos_casted, 20, ms.color_text);
             // }
             if (cell.status == .discovered) {
-                const buf: [1:0] u8 = .{std.fmt.digitToChar(cell.adjacent, .lower)};
-                rl.drawText(
+                const buf: [1:0]u8 = .{std.fmt.digitToChar(cell.adjacent, .lower)};
+                rl.DrawText(
                     &buf,
                     xpos_casted + ms.spacing / 2 - 10,
                     ypos_casted + ms.spacing / 2 - 16,
                     40,
-                    ms.color_win
+                    ms.color_win,
                 );
             }
             if (cell.status == .discovered and cell.mine) {
-                rl.drawRectangle(
+                rl.DrawRectangle(
                     xpos_casted,
                     ypos_casted,
                     ms.spacing,
                     ms.spacing,
-                    rl.Color.init(0x80, 0x20, 0x20, 0xff),
+                    rl.Color{ .r = 0x80, .g = 0x20, .b = 0x20, .a = 0xff },
                 );
             }
         }
@@ -108,23 +108,21 @@ pub fn cells(board: [][]ms.Cell) void {
 pub fn grid() void {
     for (0..ms.rows + 1) |y| {
         const ypos = ms.header_height + ms.margin_height + ms.spacing * y;
-        const ypos_casted = @as(i32, @intCast(ypos));
-        rl.drawLine(
+        rl.DrawLine(
             ms.margin_width,
-            ypos_casted,
+            @intCast(ypos),
             ms.screen_width - ms.margin_width,
-            ypos_casted,
+            @intCast(ypos),
             ms.color_grid,
         );
     }
 
     for (0..ms.columns + 1) |x| {
         const xpos = ms.margin_width + ms.spacing * x;
-        const xpos_casted = @as(i32, @intCast(xpos));
-        rl.drawLine(
-            xpos_casted,
+        rl.DrawLine(
+            @intCast(xpos),
             ms.header_height + ms.margin_height,
-            xpos_casted,
+            @intCast(xpos),
             ms.screen_height - ms.margin_height,
             ms.color_grid,
         );
@@ -140,9 +138,9 @@ pub fn win(board: [][]ms.Cell) void {
                 true => ms.color_marked,
                 false => ms.color_win,
             };
-            rl.drawRectangle(
-                @as(i32, @intCast(xpos)),
-                @as(i32, @intCast(ypos)),
+            rl.DrawRectangle(
+                @intCast(xpos),
+                @intCast(ypos),
                 ms.spacing,
                 ms.spacing,
                 color,
